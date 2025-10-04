@@ -1,0 +1,8 @@
+{
+  "name": "Calorie Tracker Dev",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "remoteEnv": {
+    "GEMINI_API_KEY": "${{secrets.GEMINI_API_KEY}}"
+  },
+  "postCreateCommand": "pip install -r requirements.txt"
+}
