@@ -12,10 +12,10 @@ app = FastAPI(title="Calorie Estimator API")
 
 # CORS (Cross-Origin Resource Sharing)
 origins = [
-    "http://localhost",
     "http://localhost:8000",
-    "http://127.0.0.1",
     "http://127.0.0.1:8000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
@@ -30,7 +30,8 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 
 # Serve frontend
-app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
+# Serve frontend (must be last)
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 @app.on_event("startup")
 async def startup_event():

@@ -33,12 +33,12 @@ A small, secure calorie-estimation prototype for a hackathon. This project uses 
     └── test_blur.py
 ```
 
-## Local Setup
+## Run the website + API together
 
-1.  **Create a virtual environment:**
+1.  **Create and activate a virtual environment:**
     ```bash
-    python3 -m venv venv
-    source venv/bin/activate
+    python -m venv .venv
+    source .venv/bin/activate   # On Windows use: .venv\Scripts\activate
     ```
 
 2.  **Install dependencies:**
@@ -47,20 +47,17 @@ A small, secure calorie-estimation prototype for a hackathon. This project uses 
     ```
 
 3.  **Set up environment variables:**
-    Create a `.env` file by copying the example:
+    Create a `.env` file and add your `GEMINI_API_KEY`.
     ```bash
-    cp .env.example .env
-    ```
-    Edit `.env` and add your `GEMINI_API_KEY`.
-    ```
-    GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+    # set your key locally:
+    echo "GEMINI_API_KEY=YOUR_KEY" > .env
     ```
 
 4.  **Run the server:**
     ```bash
-    uvicorn server.main:app --reload
+    uvicorn server.main:app --reload --port 8000
     ```
-    The application will be available at `http://127.0.0.1:8000`.
+    Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ## GitHub Codespaces Setup
 
@@ -68,7 +65,8 @@ A small, secure calorie-estimation prototype for a hackathon. This project uses 
 2.  **Add your Gemini API key as a Codespaces secret:**
     - Go to your repository's Settings > Secrets and variables > Codespaces.
     - Create a new secret named `GEMINI_API_KEY` with your API key as the value.
-3.  The Devcontainer will automatically install dependencies and set the environment variable. The application will be running on a forwarded port.
+3.  The Devcontainer will automatically install dependencies and set the environment variable.
+4.  When the server starts, ensure **port 8000** is forwarded to access the application.
 
 ## API Usage
 

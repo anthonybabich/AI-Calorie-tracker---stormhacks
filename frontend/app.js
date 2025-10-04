@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(true);
 
         try {
-            const response = await fetch('/api/analyze', {
+            const API_URL = "/api/analyze";
+            const response = await fetch(API_URL, {
                 method: 'POST',
                 body: formData,
             });
