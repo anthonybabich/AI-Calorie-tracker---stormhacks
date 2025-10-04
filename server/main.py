@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.staticfiles import StaticFiles
+from fastapi.staticfiles import StaticFiles
 from .routes import router
 
 # Configure logging
@@ -11,26 +11,18 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="Calorie Estimator API")
 
 # CORS (Cross-Origin Resource Sharing)
-origins = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:5173", "http://127.0.0.1:5173"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
-# API Router
+# API Router (define API routes first)
 app.include_router(router, prefix="/api")
 
-# Serve frontend
-# Serve frontend (must be last)
+# Mount frontend as site root (must be last so /api/* works)
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 @app.on_event("startup")

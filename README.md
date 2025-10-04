@@ -38,7 +38,7 @@ A small, secure calorie-estimation prototype for a hackathon. This project uses 
 1.  **Create and activate a virtual environment:**
     ```bash
     python -m venv .venv
-    source .venv/bin/activate   # On Windows use: .venv\Scripts\activate
+    source .venv/bin/activate   # Windows: .venv\Scripts\activate
     ```
 
 2.  **Install dependencies:**
@@ -47,7 +47,6 @@ A small, secure calorie-estimation prototype for a hackathon. This project uses 
     ```
 
 3.  **Set up environment variables:**
-    Create a `.env` file and add your `GEMINI_API_KEY`.
     ```bash
     # set your key locally:
     echo "GEMINI_API_KEY=YOUR_KEY" > .env
@@ -58,6 +57,18 @@ A small, secure calorie-estimation prototype for a hackathon. This project uses 
     uvicorn server.main:app --reload --port 8000
     ```
     Then open [http://localhost:8000](http://localhost:8000) in your browser.
+    
+    **Note:** Codespaces users should forward port 8000.
+
+## Development
+
+### Quick Run
+
+To quickly start the server during development:
+
+```bash
+uvicorn server.main:app --reload --port 8000
+```
 
 ## GitHub Codespaces Setup
 
