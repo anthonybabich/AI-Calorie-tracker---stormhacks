@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Food - Calorie Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .add-food-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-light);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-header .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .mode-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .mode-indicator.add {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .mode-indicator.check {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .upload-section {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 40px 20px;
+            text-align: center;
+            background: var(--bg-secondary);
+            margin-bottom: 30px;
+            transition: all var(--transition-fast);
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary-color);
+            background: var(--bg-card);
+        }
+
+        .upload-section.dragover {
+            border-color: var(--primary-color);
+            background: var(--bg-card);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius-small);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .file-input-label:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .selected-file {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-small);
+            display: none;
+        }
+
+        .selected-file.show {
+            display: block;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--border-radius-small);
+            object-fit: cover;
+            border: 1px solid var(--border-light);
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .estimate-button {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .estimation-result {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .estimation-result.show {
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .food-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .confidence-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .confidence-high {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .confidence-medium {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .confidence-low {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .nutrition-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-small);
+        }
+
+        .nutrition-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .nutrition-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .manual-entry {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .manual-entry.show {
+            display: block;
+        }
+
+        .manual-entry h4 {
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border-light);
+            border-radius: var(--border-radius-small);
+            font-size: 14px;
+            transition: border-color var(--transition-fast);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        .btn-back {
+            flex: 1;
+            background: var(--text-muted);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: var(--border-radius-small);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-back:hover {
+            background: var(--text-secondary);
+        }
+
+        .btn-action {
+            flex: 2;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: var(--border-radius-small);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-action:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-action:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid var(--border-light);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .suggestions {
+            margin-top: 16px;
+        }
+
+        .suggestion-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-small);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .suggestion-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .suggestion-calories {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .add-food-container {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            .nutrition-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="add-food-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div id="mode-indicator" class="mode-indicator">Add Mode</div>
+            <h1>Food Analysis</h1>
+            <p class="subtitle">Upload a photo to estimate calories and nutrition</p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="upload-section">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Choose a food photo</div>
+            <div class="upload-hint">Drag and drop an image or click to browse</div>
+            
+            <div class="file-input-wrapper">
+                <input type="file" id="file-input" class="file-input" accept="image/*" aria-label="Choose food image">
+                <label for="file-input" class="file-input-label">Browse Files</label>
+            </div>
+
+            <div class="selected-file" id="selected-file">
+                <div class="file-info">
+                    <img id="file-preview" class="file-preview" alt="Food preview">
+                    <div class="file-details">
+                        <div class="file-name" id="file-name"></div>
+                        <div class="file-size" id="file-size"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estimate Button -->
+        <button id="estimate-button" class="btn-primary estimate-button" disabled>
+            Estimate Calories
+        </button>
+
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner"></div>
+            <p>Analyzing your food...</p>
+        </div>
+
+        <!-- Estimation Result -->
+        <div class="estimation-result" id="estimation-result">
+            <div class="result-header">
+                <div class="food-name" id="result-food-name">Pizza Slice</div>
+                <div class="confidence-badge" id="confidence-badge">High Confidence</div>
+            </div>
+
+            <div class="nutrition-grid">
+                <div class="nutrition-item">
+                    <span class="nutrition-value" id="result-calories">350</span>
+                    <div class="nutrition-label">Calories</div>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-value" id="result-carbs">33</span>
+                    <div class="nutrition-label">Carbs (g)</div>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-value" id="result-protein">14</span>
+                    <div class="nutrition-label">Protein (g)</div>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-value" id="result-fat">20</span>
+                    <div class="nutrition-label">Fat (g)</div>
+                </div>
+            </div>
+
+            <!-- Suggestions for unknown foods -->
+            <div class="suggestions" id="suggestions" style="display: none;">
+                <h4>Not quite right? Try these suggestions:</h4>
+                <div id="suggestion-list"></div>
+            </div>
+        </div>
+
+        <!-- Manual Entry (for unknown foods) -->
+        <div class="manual-entry" id="manual-entry">
+            <h4>Manual Entry</h4>
+            <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                Enter nutrition information manually for foods not in our database.
+            </p>
+
+            <div class="form-group">
+                <label for="manual-name">Food Name</label>
+                <input type="text" id="manual-name" placeholder="e.g., Homemade pasta">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="manual-calories">Calories</label>
+                    <input type="number" id="manual-calories" placeholder="200" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="manual-carbs">Carbs (g)</label>
+                    <input type="number" id="manual-carbs" placeholder="25" min="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="manual-protein">Protein (g)</label>
+                    <input type="number" id="manual-protein" placeholder="8" min="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="manual-fat">Fat (g)</label>
+                    <input type="number" id="manual-fat" placeholder="8" min="0" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button id="back-button" class="btn-back">
+                Go Back
+            </button>
+            <button id="action-button" class="btn-action" disabled>
+                Add to Log
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden" role="alert" aria-live="assertive">
+        <span id="toast-message"></span>
+    </div>
+
+    <script src="add_food.js"></script>
+</body>
+</html>

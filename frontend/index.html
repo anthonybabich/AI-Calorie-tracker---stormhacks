@@ -3,17 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calorie Estimator</title>
+    <title>Calorie Tracker Dashboard</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Calorie Counter Display -->
-    <div id="calorie-counter" class="calorie-counter hidden">
-        <span>Max Calories: <strong id="daily-calories">0</strong> kcal</span>
+    <!-- Max Calories Badge with Profile Setup -->
+    <div id="max-calories-badge" class="max-calories-badge">
+        <div class="badge-content">
+            <div class="calories-info">
+                Max Calories: <strong id="max-calories-display">2000</strong> kcal
+            </div>
+            <button id="setup-profile-btn" class="btn-profile-setup">⚙️ Profile</button>
+        </div>
     </div>
 
-    <!-- Onboarding Modal -->
-    <div id="onboarding-modal" class="modal-overlay">
+    <!-- Main Dashboard Container -->
+    <div id="dashboard" class="dashboard">
+        <!-- 7-Day Date Row -->
+        <div class="date-row">
+            <div id="date-container" class="date-container" role="tablist" aria-label="Select day">
+                <!-- Date cells will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Dashboard Stats Container -->
+        <div class="dashboard-stats-container">
+            <!-- Calories Eaten Section -->
+            <div class="stats-section calories-section">
+                <div class="calories-eaten-display">
+                    <span id="calories-eaten" class="large-number" aria-live="polite">0</span>
+                    <span class="unit">Eaten</span>
+                </div>
+                <button id="add-food-btn" class="btn-secondary">Add Food</button>
+            </div>
+
+            <!-- Completion Ring Section -->
+            <div class="stats-section completion-section">
+                <div class="completion-ring-container">
+                    <svg class="completion-ring" width="200" height="200" aria-hidden="true">
+                        <circle class="ring-background" cx="100" cy="100" r="85"></circle>
+                        <circle id="ring-progress" class="ring-progress" cx="100" cy="100" r="85" 
+                                role="progressbar" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100" 
+                                aria-valuenow="0"
+                                aria-label="Calorie progress"></circle>
+                    </svg>
+                    <div class="ring-center">
+                        <span id="calories-remaining" class="remaining-number" aria-live="polite">2000</span>
+                        <span class="remaining-label">Remaining</span>
+                        <div class="max-calories-small">
+                            <span id="max-calories-center">2000</span> cal
+                        </div>
+                    </div>
+                </div>
+                <button id="check-food-btn" class="btn-outline">Check Food</button>
+            </div>
+
+            <!-- Macros Section -->
+            <div class="stats-section macros-section">
+                <div class="macro-bars">
+                    <div class="macro-item">
+                        <div class="macro-header">
+                            <span class="macro-name">Carbs</span>
+                            <span class="macro-values">
+                                <span id="carbs-eaten" aria-live="polite">0</span> / 
+                                <span id="carbs-target">250</span> g
+                            </span>
+                        </div>
+                        <div class="macro-bar">
+                            <div id="carbs-progress" class="macro-progress carbs" 
+                                 role="progressbar" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100" 
+                                 aria-valuenow="0"
+                                 aria-label="Carbs progress"></div>
+                        </div>
+                    </div>
+
+                    <div class="macro-item">
+                        <div class="macro-header">
+                            <span class="macro-name">Protein</span>
+                            <span class="macro-values">
+                                <span id="protein-eaten" aria-live="polite">0</span> / 
+                                <span id="protein-target">100</span> g
+                            </span>
+                        </div>
+                        <div class="macro-bar">
+                            <div id="protein-progress" class="macro-progress protein" 
+                                 role="progressbar" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100" 
+                                 aria-valuenow="0"
+                                 aria-label="Protein progress"></div>
+                        </div>
+                    </div>
+
+                    <div class="macro-item">
+                        <div class="macro-header">
+                            <span class="macro-name">Fat</span>
+                            <span class="macro-values">
+                                <span id="fat-eaten" aria-live="polite">0</span> / 
+                                <span id="fat-target">67</span> g
+                            </span>
+                        </div>
+                        <div class="macro-bar">
+                            <div id="fat-progress" class="macro-progress fat" 
+                                 role="progressbar" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100" 
+                                 aria-valuenow="0"
+                                 aria-label="Fat progress"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Food Log Section -->
+    <div id="food-log" class="food-log">
+        <h3>Today's Food Log</h3>
+        <div id="food-entries" class="food-entries">
+            <!-- Food entries will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden" role="alert" aria-live="assertive">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Debug Panel (only shown when DEBUG = true) -->
+    <div id="debug-panel" class="debug-panel hidden">
+        <h4>Debug Panel</h4>
+        <button id="debug-toggle" class="btn-small">Show/Hide Data</button>
+        <button id="debug-reset" class="btn-small">Reset Day Data</button>
+        <pre id="debug-content" class="debug-content hidden"></pre>
+    </div>
+
+    <!-- Onboarding Modal (kept for profile setup) -->
+    <div id="onboarding-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-title">Set Up Your Profile</h2>
