@@ -291,11 +291,13 @@ body {
 }
 
 .stats-section.calories-section {
-    align-items: flex-start;
+    align-items: center;
+    padding-left: 30px;
 }
 
 .stats-section.macros-section {
-    align-items: flex-end;
+    align-items: center;
+    padding-right: 30px;
 }
 
 /* Button styling within stats container */
