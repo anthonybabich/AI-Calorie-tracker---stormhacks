@@ -225,7 +225,49 @@ async function estimateFood() {
 }
 
 // ===== ESTIMATION FUNCTIONS (same as app.js) =====
-function estimateFromImage(file) {
+async function estimateFromImage(file) {
+    console.log('Making API call to backend...');
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        const response = await fetch('http://localhost:8000/api/analyze', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('API response:', result);
+        
+        if (!result.ok) {
+            throw new Error(result.message || 'API returned error');
+        }
+        
+        // Transform API response to match expected format
+        return {
+            name: result.food || 'Unknown food',
+            calories: result.calories || 200,
+            carbs_g: result.carbs_g || Math.round(result.calories * 0.5 / 4), // 50% carbs default
+            protein_g: result.protein_g || Math.round(result.calories * 0.2 / 4), // 20% protein default  
+            fat_g: result.fat_g || Math.round(result.calories * 0.3 / 9), // 30% fat default
+            confidence: result.confidence || 0.5
+        };
+        
+    } catch (error) {
+        console.error('API call failed:', error);
+        
+        // Fallback to local estimation if API fails
+        console.log('Falling back to local estimation...');
+        return getLocalEstimation(file);
+    }
+}
+
+function getLocalEstimation(file) {
     const filename = file.name.toLowerCase();
     
     const foodDatabase = {
@@ -241,19 +283,19 @@ function estimateFromImage(file) {
     // Check filename for keywords
     for (const [keyword, food] of Object.entries(foodDatabase)) {
         if (filename.includes(keyword)) {
-            return Promise.resolve(food);
+            return food;
         }
     }
     
     // Unknown food - return default estimation
-    return Promise.resolve({
+    return {
         name: "Unknown food item",
         calories: 200,
         carbs_g: 25,
         protein_g: 8,
         fat_g: 8,
         confidence: 0.4
-    });
+    };
 }
 
 // ===== UI UPDATES =====

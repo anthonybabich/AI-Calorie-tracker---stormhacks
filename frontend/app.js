@@ -376,8 +376,6 @@ function updateCompletionRing(percent) {
 }
 
 function updateMacroBar(macro, eaten, target, totalCalories = 0) {
-    const percent = Math.min(100, (eaten / target) * 100);
-    
     // Update grams consumed
     document.getElementById(`${macro}-eaten`).textContent = Math.round(eaten);
     
@@ -395,10 +393,10 @@ function updateMacroBar(macro, eaten, target, totalCalories = 0) {
     const percentOfConsumedCalories = totalCalories > 0 ? Math.round((caloriesFromMacro / totalCalories) * 100) : 0;
     document.getElementById(`${macro}-percentage`).textContent = `${percentOfConsumedCalories}%`;
     
-    // Update progress bar (still based on target for visual progress)
+    // Update progress bar to match the percentage display (calorie distribution)
     const progressBar = document.getElementById(`${macro}-progress`);
-    progressBar.style.width = `${percent}%`;
-    progressBar.setAttribute('aria-valuenow', Math.round(percent));
+    progressBar.style.width = `${percentOfConsumedCalories}%`;
+    progressBar.setAttribute('aria-valuenow', percentOfConsumedCalories);
 }
 
 function updateFoodLog() {
