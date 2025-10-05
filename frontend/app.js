@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.debug('App initialized');
     
     currentProfile = loadProfile();
+    // Force reload current day data to ensure latest updates
     currentDayData = loadDay(currentDate);
     
     initializeUI();
@@ -22,6 +23,58 @@ document.addEventListener('DOMContentLoaded', () => {
         console.debug('Day data:', currentDayData);
     }
 });
+
+// Add visibility change listener to refresh when returning to page
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        // Page became visible, refresh data
+        currentDayData = loadDay(currentDate);
+        updateDashboard();
+        console.debug('Page visible - refreshed data');
+    }
+});
+
+// Add window focus event to refresh when returning to dashboard
+window.addEventListener('focus', () => {
+    currentDayData = loadDay(currentDate);
+    updateDashboard();
+    console.debug('Window focused - refreshed data');
+});
+
+// Debug helper function - add to window for testing
+window.debugClearToday = function() {
+    const key = getDayKey(new Date());
+    localStorage.removeItem(key);
+    console.log('Cleared today\'s data');
+    location.reload();
+};
+
+// Debug helper function - add test entry
+window.debugAddTestEntry = function() {
+    const today = new Date();
+    const dayKey = getDayKey(today);
+    
+    const testData = {
+        date: today.toISOString().split('T')[0],
+        eatenCalories: 200,
+        carbs_g: 25,
+        protein_g: 8,
+        fat_g: 8,
+        entries: [{
+            id: Date.now(),
+            name: 'Test Food',
+            calories: 200,
+            carbs_g: 25,
+            protein_g: 8,
+            fat_g: 8,
+            timestamp: new Date().toISOString()
+        }]
+    };
+    
+    localStorage.setItem(dayKey, JSON.stringify(testData));
+    console.log('Added test entry:', testData);
+    location.reload();
+};
 
 // ===== CORE DATA FUNCTIONS =====
 
@@ -85,12 +138,21 @@ function loadDay(date) {
     const key = getDayKey(date);
     const stored = localStorage.getItem(key);
     
+    if (DEBUG) {
+        console.debug('Loading day with key:', key);
+        console.debug('Stored data:', stored);
+    }
+    
     if (stored) {
-        return JSON.parse(stored);
+        const dayData = JSON.parse(stored);
+        if (DEBUG) {
+            console.debug('Parsed day data:', dayData);
+        }
+        return dayData;
     }
     
     // Return default day structure
-    return {
+    const defaultDay = {
         date: date.toISOString().split('T')[0],
         eatenCalories: 0,
         carbs_g: 0,
@@ -98,6 +160,12 @@ function loadDay(date) {
         fat_g: 0,
         entries: []
     };
+    
+    if (DEBUG) {
+        console.debug('Returning default day:', defaultDay);
+    }
+    
+    return defaultDay;
 }
 
 function saveDay(dayObj) {
@@ -258,10 +326,21 @@ function updateDashboard() {
     const completionPercent = Math.min(100, (currentDayData.eatenCalories / targets.maxCalories) * 100);
     updateCompletionRing(completionPercent);
     
-    // Update macro bars
-    updateMacroBar('carbs', currentDayData.carbs_g, targets.macroTargets.carbs_g);
-    updateMacroBar('protein', currentDayData.protein_g, targets.macroTargets.protein_g);
-    updateMacroBar('fat', currentDayData.fat_g, targets.macroTargets.fat_g);
+    // Debug macro values
+    if (DEBUG) {
+        console.debug('Current day data:', currentDayData);
+        console.debug('Macro values:', {
+            carbs: currentDayData.carbs_g,
+            protein: currentDayData.protein_g,
+            fat: currentDayData.fat_g
+        });
+        console.debug('Macro targets:', targets.macroTargets);
+    }
+    
+    // Update macro bars - ensure values are not undefined
+    updateMacroBar('carbs', currentDayData.carbs_g || 0, targets.macroTargets.carbs_g);
+    updateMacroBar('protein', currentDayData.protein_g || 0, targets.macroTargets.protein_g);
+    updateMacroBar('fat', currentDayData.fat_g || 0, targets.macroTargets.fat_g);
     
     updateFoodLog();
 }

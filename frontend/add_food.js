@@ -31,11 +31,16 @@ function initializeMode() {
 
 // ===== EVENT LISTENERS =====
 function setupEventListeners() {
-    // File input
+    // File inputs (both camera and browse)
+    document.getElementById('camera-input').addEventListener('change', handleFileSelection);
     document.getElementById('file-input').addEventListener('change', handleFileSelection);
     
     // Estimate button
-    document.getElementById('estimate-button').addEventListener('click', estimateFood);
+    document.getElementById('estimate-button').addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        estimateFood();
+    });
     
     // Action buttons
     document.getElementById('back-button').addEventListener('click', goBack);
@@ -184,11 +189,22 @@ function showLoading(show) {
 }
 
 function showEstimationResult(estimation) {
+    // Debug the estimation object
+    console.debug('Showing estimation result:', estimation);
+    
     document.getElementById('result-food-name').textContent = estimation.name;
     document.getElementById('result-calories').textContent = estimation.calories;
-    document.getElementById('result-carbs').textContent = Math.round(estimation.carbs_g * 10) / 10;
-    document.getElementById('result-protein').textContent = Math.round(estimation.protein_g * 10) / 10;
-    document.getElementById('result-fat').textContent = Math.round(estimation.fat_g * 10) / 10;
+    
+    // Handle both possible property names for macros
+    const carbs = estimation.carbs_g || estimation.carbs || 0;
+    const protein = estimation.protein_g || estimation.protein || 0;
+    const fat = estimation.fat_g || estimation.fat || 0;
+    
+    document.getElementById('result-carbs').textContent = Math.round(carbs * 10) / 10;
+    document.getElementById('result-protein').textContent = Math.round(protein * 10) / 10;
+    document.getElementById('result-fat').textContent = Math.round(fat * 10) / 10;
+    
+    console.debug('Displaying macros:', { carbs, protein, fat });
     
     // Update confidence badge
     const confidenceBadge = document.getElementById('confidence-badge');
@@ -302,10 +318,54 @@ function addToLog() {
         const today = new Date();
         const dayKey = getDayKey(today);
         
-        // Add food entry (using functions from app.js)
-        const entry = addFoodEntry(dayKey, currentEstimation);
+        // Get existing day data or create new one (matching app.js structure)
+        const storedData = localStorage.getItem(dayKey);
+        let dayData;
         
-        showToast(`Added ${currentEstimation.calories} kcal - ${currentEstimation.name}`);
+        if (storedData) {
+            dayData = JSON.parse(storedData);
+        } else {
+            dayData = {
+                date: today.toISOString().split('T')[0],
+                eatenCalories: 0,
+                carbs_g: 0,
+                protein_g: 0,
+                fat_g: 0,
+                entries: []
+            };
+        }
+        
+        // Create food entry
+        const entry = {
+            id: Date.now(),
+            name: currentEstimation.name || 'Food Item',
+            calories: parseFloat(currentEstimation.calories) || 0,
+            carbs_g: parseFloat(currentEstimation.carbs || currentEstimation.carbs_g) || 0,
+            protein_g: parseFloat(currentEstimation.protein || currentEstimation.protein_g) || 0,
+            fat_g: parseFloat(currentEstimation.fat || currentEstimation.fat_g) || 0,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Debug logging
+        console.debug('Current estimation:', currentEstimation);
+        console.debug('Created entry:', entry);
+        
+        // Add to entries array
+        dayData.entries.push(entry);
+        
+        // Update totals
+        dayData.eatenCalories += entry.calories;
+        dayData.carbs_g += entry.carbs_g;
+        dayData.protein_g += entry.protein_g;
+        dayData.fat_g += entry.fat_g;
+        
+        // Debug final day data
+        console.debug('Final day data before saving:', dayData);
+        
+        // Save back to localStorage using the same key format as app.js
+        localStorage.setItem(dayKey, JSON.stringify(dayData));
+        
+        showToast(`Added ${entry.calories} kcal - ${entry.name}`);
         
         // Navigate back to dashboard after a short delay
         setTimeout(() => {
