@@ -22,25 +22,26 @@ else:
     logger.warning("GEMINI_API_KEY not found. Running in offline/fallback mode.")
 
 # --- Fallback Data ---
-FALLBACK_CALORIES = {
-    "apple": 95,
-    "banana": 105,
-    "slice of pizza": 285,
-    "hamburger": 354,
-    "salad": 150,
+FALLBACK_NUTRITION = {
+    "apple": {"calories": 95, "carbs_g": 25, "protein_g": 0.5, "fat_g": 0.3},
+    "banana": {"calories": 105, "carbs_g": 27, "protein_g": 1.3, "fat_g": 0.4},
+    "slice of pizza": {"calories": 285, "carbs_g": 36, "protein_g": 12, "fat_g": 10},
+    "hamburger": {"calories": 354, "carbs_g": 40, "protein_g": 25, "fat_g": 16},
+    "salad": {"calories": 150, "carbs_g": 10, "protein_g": 3, "fat_g": 10},
 }
 
 def _get_fallback_estimate(labels):
     """Provides a deterministic fallback calorie estimate based on simple labels."""
     if not labels:
-        return "unknown", 100, 0.1 # Default fallback
+        return "unknown", 100, 5, 2, 3, 0.1 # Default fallback with macros
     
     primary_label = labels[0].lower()
-    for food, calories in FALLBACK_CALORIES.items():
+    for food, nutrition in FALLBACK_NUTRITION.items():
         if food in primary_label:
-            return food, calories, 0.5 # Confidence is lower for fallback
+            return (food, nutrition["calories"], nutrition["carbs_g"], 
+                   nutrition["protein_g"], nutrition["fat_g"], 0.5)
     
-    return primary_label, 100, 0.1 # Default if no match
+    return primary_label, 100, 5, 2, 3, 0.1 # Default if no match
 
 def estimate_calories_from_image(image_bytes: bytes, file_name: str) -> dict:
     """
@@ -59,11 +60,14 @@ def estimate_calories_from_image(image_bytes: bytes, file_name: str) -> dict:
 
     if not GEMINI_API_KEY:
         logger.info("Using fallback calorie estimation.")
-        food, calories, confidence = _get_fallback_estimate(simple_labels)
+        food, calories, carbs_g, protein_g, fat_g, confidence = _get_fallback_estimate(simple_labels)
         return {
             "ok": True,
             "food": food,
             "calories_est": calories,
+            "carbs_g": carbs_g,
+            "protein_g": protein_g,
+            "fat_g": fat_g,
             "confidence": confidence,
             "labels": simple_labels,
             "error": None,
@@ -82,12 +86,14 @@ def estimate_calories_from_image(image_bytes: bytes, file_name: str) -> dict:
         
         # Create a comprehensive prompt for food analysis
         prompt = (
-            "Analyze this food image and provide a calorie estimate. "
+            "Analyze this food image and provide detailed nutritional information. "
             "Look carefully at the food item(s) in the image and identify what they are. "
-            "Provide your response in exactly this format: food_name,calories,confidence_score "
+            "Provide your response in exactly this format: food_name,calories,carbs_g,protein_g,fat_g,confidence_score "
             "Where food_name is a clear description of the food, calories is an integer estimate, "
-            "and confidence_score is between 0.0 and 1.0 representing how confident you are in your identification. "
-            "Example: chocolate chip cookie,150,0.8"
+            "carbs_g is grams of carbohydrates, protein_g is grams of protein, fat_g is grams of fat, "
+            "and confidence_score is between 0.0 and 1.0 representing how confident you are. "
+            "Example: chocolate chip cookie,150,20,2,7,0.8 "
+            "Be as accurate as possible with standard serving sizes."
         )
         
         # Send both the image and prompt to Gemini
@@ -97,17 +103,23 @@ def estimate_calories_from_image(image_bytes: bytes, file_name: str) -> dict:
         # This parsing is fragile and for demonstration purposes.
         # A more robust solution would request JSON output from Gemini.
         parts = response.text.strip().split(',')
-        if len(parts) != 3:
-            raise ValueError("Unexpected response format from Gemini.")
+        if len(parts) != 6:
+            raise ValueError(f"Unexpected response format from Gemini. Expected 6 parts, got {len(parts)}: {response.text}")
             
         food_name = parts[0].strip()
         calories_est = int(parts[1].strip())
-        confidence = float(parts[2].strip())
+        carbs_g = float(parts[2].strip())
+        protein_g = float(parts[3].strip())
+        fat_g = float(parts[4].strip())
+        confidence = float(parts[5].strip())
 
         return {
             "ok": True,
             "food": food_name,
             "calories_est": calories_est,
+            "carbs_g": carbs_g,
+            "protein_g": protein_g,
+            "fat_g": fat_g,
             "confidence": confidence,
             "labels": simple_labels, # In a real app, these would come from a Vision API
             "error": None,
@@ -116,11 +128,14 @@ def estimate_calories_from_image(image_bytes: bytes, file_name: str) -> dict:
     except Exception as e:
         logger.error(f"Error calling Gemini API: {e}. Falling back to deterministic estimate.")
         # Fallback on API error
-        food, calories, confidence = _get_fallback_estimate(simple_labels)
+        food, calories, carbs_g, protein_g, fat_g, confidence = _get_fallback_estimate(simple_labels)
         return {
             "ok": True,
             "food": food,
             "calories_est": calories,
+            "carbs_g": carbs_g,
+            "protein_g": protein_g,
+            "fat_g": fat_g,
             "confidence": confidence,
             "labels": simple_labels,
             "error": f"Gemini API call failed: {e}",

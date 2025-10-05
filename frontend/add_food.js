@@ -252,9 +252,9 @@ async function estimateFromImage(file) {
         return {
             name: result.food || 'Unknown food',
             calories: result.calories || 200,
-            carbs_g: result.carbs_g || Math.round(result.calories * 0.5 / 4), // 50% carbs default
-            protein_g: result.protein_g || Math.round(result.calories * 0.2 / 4), // 20% protein default  
-            fat_g: result.fat_g || Math.round(result.calories * 0.3 / 9), // 30% fat default
+            carbs_g: result.carbs_g || Math.round(result.calories * 0.5 / 4), // Use API value or fallback
+            protein_g: result.protein_g || Math.round(result.calories * 0.2 / 4), // Use API value or fallback
+            fat_g: result.fat_g || Math.round(result.calories * 0.3 / 9), // Use API value or fallback
             confidence: result.confidence || 0.5
         };
         

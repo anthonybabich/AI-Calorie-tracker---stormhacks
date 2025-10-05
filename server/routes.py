@@ -50,7 +50,10 @@ async def analyze_image(file: UploadFile = File(...)):
         response = {
             "ok": result.get("ok", False),
             "food": result.get("food"),
-            "calories_est": result.get("calories_est"),
+            "calories": result.get("calories_est"),  # Map calories_est to calories for frontend
+            "carbs_g": result.get("carbs_g"),
+            "protein_g": result.get("protein_g"), 
+            "fat_g": result.get("fat_g"),
             "confidence": result.get("confidence"),
             "meta": {
                 "labels": result.get("labels", []),
