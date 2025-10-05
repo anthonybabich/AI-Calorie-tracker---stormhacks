@@ -1,11 +1,24 @@
+console.log('app.js loaded successfully');
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing app...');
+    
     const form = document.getElementById('upload-form');
     const fileInput = document.getElementById('file-input');
     const loader = document.getElementById('loader');
     const resultDiv = document.getElementById('result');
     const submitButton = form.querySelector('button');
 
+    console.log('Elements found:', {
+        form: !!form,
+        fileInput: !!fileInput,
+        loader: !!loader,
+        resultDiv: !!resultDiv,
+        submitButton: !!submitButton
+    });
+
     form.addEventListener('submit', async (event) => {
+        console.log('Form submitted');
         event.preventDefault();
 
         if (!fileInput.files.length) {
@@ -28,6 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
+            
+            // Debug: Log the response data
+            console.log('API Response:', data);
+            console.log('Response ok status:', response.ok);
+            console.log('Data ok property:', data.ok);
 
             if (!response.ok) {
                 // Handle HTTP errors (e.g., 400, 500)
@@ -53,7 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function setLoading(isLoading) {
         loader.style.display = isLoading ? 'block' : 'none';
         submitButton.disabled = isLoading;
-        resultDiv.style.display = 'none'; // Hide previous results
+        if (isLoading) {
+            resultDiv.style.display = 'none'; // Only hide when starting to load
+        }
     }
 
     function displayError(message) {
@@ -63,6 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayResult(data) {
+        console.log('displayResult called with data:', data);
+        console.log('resultDiv element:', resultDiv);
+        
         resultDiv.style.display = 'block';
         resultDiv.className = '';
 
@@ -78,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         resultDiv.innerHTML = html;
+        console.log('Result HTML set:', html);
     }
 
     function capitalize(str) {

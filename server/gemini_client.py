@@ -71,21 +71,27 @@ def estimate_calories_from_image(image_bytes: bytes, file_name: str) -> dict:
 
     try:
         logger.info("Calling Gemini API for calorie estimation.")
-        # TODO: Replace with a multimodal call when the API supports it directly
-        # For now, we simulate a text-based call using extracted labels.
-        # A more advanced implementation would use a Vision API to get labels first.
         
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-flash-latest')
         
-        # Example prompt structure for Gemini
+        # Convert bytes to PIL Image for Gemini
+        from PIL import Image
+        import io
+        
+        image = Image.open(io.BytesIO(image_bytes))
+        
+        # Create a comprehensive prompt for food analysis
         prompt = (
-            f"Estimate the calories for a food item with the following characteristics. "
-            f"Primary label: '{simple_labels[0]}'. "
-            f"Provide the food name, estimated calories as an integer, and a confidence score from 0.0 to 1.0. "
-            f"Format the response as a simple comma-separated string: food_name,calories,confidence_score"
+            "Analyze this food image and provide a calorie estimate. "
+            "Look carefully at the food item(s) in the image and identify what they are. "
+            "Provide your response in exactly this format: food_name,calories,confidence_score "
+            "Where food_name is a clear description of the food, calories is an integer estimate, "
+            "and confidence_score is between 0.0 and 1.0 representing how confident you are in your identification. "
+            "Example: chocolate chip cookie,150,0.8"
         )
-
-        response = model.generate_content(prompt)
+        
+        # Send both the image and prompt to Gemini
+        response = model.generate_content([prompt, image])
         
         # --- Parse Gemini's response ---
         # This parsing is fragile and for demonstration purposes.
