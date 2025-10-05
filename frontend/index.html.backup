@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"                    <div class="macro-item">
+                        <div class="macro-header">
+                            <span class="macro-name">Protein</span>
+                            <span class="macro-percentage" id="protein-percentage">0%</span>
+                        </div>
+                        <div class="macro-grams"><span id="protein-eaten" aria-live="polite">0</span>g</div>
+                        <div class="macro-bar"                    <div class="macro-item">
+                        <div class="macro-header">
+                            <span class="macro-name">Fat</span>
+                            <span class="macro-percentage" id="fat-percentage">0%</span>
+                        </div>
+                        <div class="macro-grams"><span id="fat-eaten" aria-live="polite">0</span>g</div>
+                        <div class="macro-bar">
+                                                    <div id="protein-progress" class="div id="fat-progress" class="macro-progracro-progress pross fatein" 
+                                 role="progressb" 
+                                 role="progressbar"r" 
+                                 aria-valuemi
+                                 aria-valuemin="0" 
+                                 aria-v="0" 
+                                 aria-valueluemax="100" 
+                                 aria-valuenow="0"
+                                 aria-labax="100" 
+                                 aria-valuenow="0"
+                                 aria-labell="Protein progress"></div>
+                        </div>
+                    </div>"Fat progress"></div>
+                        </div>
+                    </div>"viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Tracker Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Max Calories Badge with Profile Setup -->
+    <div id="max-calories-badge" class="max-calories-badge">
+        <div class="badge-content">
+            <div class="calories-info">
+                Max Calories: <strong id="max-calories-display">2000</strong> kcal
+            </div>
+            <button id="setup-profile-btn" class="btn-profile-setup">⚙️ Profile</button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Container -->
+    <div id="dashboard" class="dashboard">
+        <!-- 7-Day Date Row -->
+        <div class="date-row">
+            <div id="date-container" class="date-container" role="tablist" aria-label="Select day">
+                <!-- Date cells will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Dashboard Stats Container -->
+        <div class="dashboard-stats-container">
+            <!-- Calories Eaten Section -->
+            <div class="stats-section calories-section">
+                <div class="calories-eaten-display">
+                    <span id="calories-eaten" class="large-number" aria-live="polite">0</span>
+                    <span class="unit">Eaten</span>
+                </div>
+                <button id="add-food-btn" class="btn-secondary">Add Food</button>
+            </div>
+
+            <!-- Completion Ring Section -->
+            <div class="stats-section completion-section">
+                <div class="completion-ring-container">
+                    <svg class="completion-ring" width="200" height="200" viewBox="0 0 200 200" aria-hidden="true">
+                        <circle class="ring-background" cx="100" cy="100" r="85"></circle>
+                        <circle id="ring-progress" class="ring-progress" cx="100" cy="100" r="85" 
+                                role="progressbar" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100" 
+                                aria-valuenow="0"
+                                aria-label="Calorie progress"></circle>
+                    </svg>
+                    <div class="ring-center">
+                        <span id="calories-remaining" class="remaining-number" aria-live="polite">2000</span>
+                        <span class="remaining-label">Remaining</span>
+                        <div class="max-calories-small">
+                            <span id="max-calories-center">2000</span> cal
+                        </div>
+                    </div>
+                </div>
+                <button id="check-food-btn" class="btn-outline">Check Food</button>
+            </div>
+
+            <!-- Macros Section -->
+            <div class="stats-section macros-section">
+                <div class="macro-bars">
+                    <div class="macro-item">
+                        <div class="macro-header">
+                            <span class="macro-name">Carbs</span>
+                            <span class="macro-percentage" id="carbs-percentage">0%</span>
+                        </div>
+                        <div class="macro-grams"><span id="carbs-eaten" aria-live="polite">0</span>g</div>
+                        <div class="macro-bar">
+                            <div id="carbs-progress" class="macro-progress carbs" 
+                                 role="progressbar" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100" 
+                                 aria-valuenow="0"
+                                 aria-label="Carbs progress"></div>
+                        </div>
+                    </div>
+
+                    <div class="macro-item">
+                        <div class="macro-header">
+                            <span class="macro-name">Protein</span>
+                            <div class="macro-values">
+                                <span class="macro-grams"><span id="protein-eaten" aria-live="polite">0</span>g</span>
+                                <span class="macro-percentage" id="protein-percentage">0%</span>
+                            </div>
+                        </div>
+                        <div class="macro-bar">
+                            <div id="protein-progress" class="macro-progress protein" 
+                                 role="progressbar" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100" 
+                                 aria-valuenow="0"
+                                 aria-label="Protein progress"></div>
+                        </div>
+                    </div>
+
+                    <div class="macro-item">
+                        <div class="macro-header">
+                            <span class="macro-name">Fat</span>
+                            <div class="macro-values">
+                                <span class="macro-grams"><span id="fat-eaten" aria-live="polite">0</span>g</span>
+                                <span class="macro-percentage" id="fat-percentage">0%</span>
+                            </div>
+                        </div>
+                        <div class="macro-bar">
+                            <div id="fat-progress" class="macro-progress fat" 
+                                 role="progressbar" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100" 
+                                 aria-valuenow="0"
+                                 aria-label="Fat progress"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Food Log Section -->
+    <div id="food-log" class="food-log">
+        <h3>Today's Food Log</h3>
+        <div id="food-entries" class="food-entries">
+            <!-- Food entries will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden" role="alert" aria-live="assertive">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Debug Panel (only shown when DEBUG = true) -->
+    <div id="debug-panel" class="debug-panel hidden">
+        <h4>Debug Panel</h4>
+        <button id="debug-toggle" class="btn-small">Show/Hide Data</button>
+        <button id="debug-reset" class="btn-small">Reset Day Data</button>
+        <pre id="debug-content" class="debug-content hidden"></pre>
+    </div>
+
+    <!-- Onboarding Modal (kept for profile setup) -->
+    <div id="onboarding-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Set Up Your Profile</h2>
+                <button id="cancel-btn" class="cancel-btn" aria-label="Cancel">&times;</button>
+            </div>
+            
+            <!-- Step 1: Basic Info -->
+            <div id="step-1" class="step active">
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label for="activity-level">Days of activity per week:</label>
+                        <select id="activity-level" required>
+                            <option value="">Select activity level</option>
+                            <option value="0">0 days (Sedentary)</option>
+                            <option value="1">1 day (Sedentary)</option>
+                            <option value="2">2 days (Light)</option>
+                            <option value="3">3 days (Light)</option>
+                            <option value="4">4 days (Moderate)</option>
+                            <option value="5">5 days (Moderate)</option>
+                            <option value="6">6 days (Very Active)</option>
+                            <option value="7">7 days (Very Active)</option>
+                        </select>
+                        <div class="error-message" id="activity-error" role="alert"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="text" id="age" required placeholder="25" maxlength="3">
+                        <div class="error-message" id="age-error" role="alert"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height">Height:</label>
+                        <div class="input-with-units">
+                            <input type="text" id="height" required placeholder="170">
+                            <select id="height-unit">
+                                <option value="cm">cm</option>
+                                <option value="in">in</option>
+                            </select>
+                        </div>
+                        <div class="error-message" id="height-error" role="alert"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Weight:</label>
+                        <div class="input-with-units">
+                            <input type="text" id="weight" required placeholder="70">
+                            <select id="weight-unit">
+                                <option value="kg">kg</option>
+                                <option value="lb">lb</option>
+                            </select>
+                        </div>
+                        <div class="error-message" id="weight-error" role="alert"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gender:</label>
+                        <div class="button-group">
+                            <button type="button" class="select-btn" id="male-btn" data-value="male">Male</button>
+                            <button type="button" class="select-btn" id="female-btn" data-value="female">Female</button>
+                        </div>
+                        <div class="error-message" id="gender-error" role="alert"></div>
+                    </div>
+
+                    <button type="submit" id="next-btn" class="primary-btn" disabled>Next</button>
+                </form>
+            </div>
+
+            <!-- Step 2: Goal Selection -->
+            <div id="step-2" class="step">
+                <div class="form-group">
+                    <label>What's your goal?</label>
+                    <div class="button-group goal-buttons">
+                        <button type="button" class="select-btn goal-btn" data-value="cutting">
+                            <strong>Cutting</strong>
+                            <span>Lose weight (-20%)</span>
+                        </button>
+                        <button type="button" class="select-btn goal-btn" data-value="maintaining">
+                            <strong>Maintaining</strong>
+                            <span>Maintain weight (0%)</span>
+                        </button>
+                        <button type="button" class="select-btn goal-btn" data-value="bulking">
+                            <strong>Bulking</strong>
+                            <span>Gain weight (+15%)</span>
+                        </button>
+                    </div>
+                    <div class="error-message" id="goal-error" role="alert"></div>
+                </div>
+
+                <div class="button-row">
+                    <button type="button" id="back-btn" class="secondary-btn">Back</button>
+                    <button type="button" id="complete-btn" class="primary-btn" disabled>Complete Setup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="main-content" class="container">
+        <h1>Upload Food Image</h1>
+        
+        <!-- Profile Summary Card -->
+        <div id="profile-summary" class="profile-card hidden">
+            <h3>Your Profile</h3>
+            <div id="profile-details"></div>
+            <button id="edit-profile-btn" class="secondary-btn">Edit Profile</button>
+        </div>
+
+        <form id="upload-form">
+            <input type="file" id="file-input" name="file" accept="image/*" required>
+            <button type="submit">Estimate Calories</button>
+        </form>
+        <div class="loader" id="loader"></div>
+        <div id="result"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

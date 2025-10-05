@@ -80,6 +80,9 @@ body {
     cursor: pointer;
     transition: all var(--transition-fast);
     box-shadow: var(--shadow-light);
+    position: relative;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -104,6 +107,9 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
+    position: relative;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
 }
 
 .btn-secondary:hover {
@@ -120,6 +126,9 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-fast);
+    position: relative;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
 }
 
 .btn-outline:hover {
@@ -183,6 +192,9 @@ body {
     cursor: pointer;
     transition: all var(--transition-fast);
     white-space: nowrap;
+    position: relative;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
 }
 
 .btn-profile-setup:hover {
@@ -424,30 +436,41 @@ body {
     margin-bottom: 0;
 }
 
-.macro-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
 .macro-name {
     font-weight: 600;
     font-size: 18px;
     color: var(--text-primary);
+    margin-bottom: 8px;
 }
 
-.macro-values {
-    font-size: 16px;
-    color: var(--text-secondary);
-    font-weight: 600;
+.macro-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 6px;
 }
 
 .macro-bar {
+    flex: 1;
+    min-width: 200px;
     height: 6px;
     background: #e5e7eb;
     border-radius: 3px;
     overflow: hidden;
+}
+
+.macro-percentage {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 45px;
+    text-align: right;
+}
+
+.macro-grams {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
 }
 
 .macro-progress {

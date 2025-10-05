@@ -17,15 +17,78 @@ function initializeMode() {
     
     const modeIndicator = document.getElementById('mode-indicator');
     const actionButton = document.getElementById('action-button');
+    const backButton = document.getElementById('back-button');
     
     if (currentMode === 'check') {
         modeIndicator.textContent = 'Check Mode';
         modeIndicator.className = 'mode-indicator check';
-        actionButton.textContent = 'Go Back';
+        
+        // Hide the back button completely in check mode
+        if (backButton) {
+            backButton.style.display = 'none';
+        }
+        
+        // Make action button say "Go Back" and span full width
+        if (actionButton) {
+            actionButton.textContent = 'Go Back';
+            actionButton.style.display = 'block';
+            actionButton.style.width = '100%';
+            actionButton.style.flex = '1';
+            actionButton.disabled = false;
+        }
+        
+        // Aggressively remove manual entry section in check mode
+        setTimeout(() => {
+            const manualEntry = document.getElementById('manual-entry');
+            if (manualEntry) {
+                console.log('Removing manual entry section in check mode');
+                manualEntry.style.display = 'none';
+                manualEntry.remove();
+                manualEntry.parentNode?.removeChild(manualEntry);
+            }
+            
+            // Also remove any elements with manual-entry class
+            const manualElements = document.querySelectorAll('.manual-entry');
+            manualElements.forEach(el => {
+                el.style.display = 'none';
+                el.remove();
+            });
+            
+            console.log('Manual entry removal complete');
+        }, 50);
+        
+        // Set up a continuous check to prevent manual entry from ever appearing
+        setInterval(() => {
+            if (currentMode === 'check') {
+                const manualEntry = document.getElementById('manual-entry');
+                if (manualEntry) {
+                    manualEntry.style.display = 'none !important';
+                    manualEntry.classList.remove('show');
+                    manualEntry.remove();
+                }
+            }
+        }, 100);
+        
+        document.body.classList.add('check-mode');
     } else {
         modeIndicator.textContent = 'Add Mode';
         modeIndicator.className = 'mode-indicator add';
-        actionButton.textContent = 'Add to Log';
+        
+        // Show both buttons in add mode
+        if (backButton) {
+            backButton.style.display = 'block';
+            backButton.style.width = '';
+            backButton.style.flex = '';
+        }
+        
+        if (actionButton) {
+            actionButton.textContent = 'Add to Log';
+            actionButton.style.display = 'block';
+            actionButton.style.width = '';
+            actionButton.style.flex = '';
+        }
+        
+        document.body.classList.add('add-mode');
     }
 }
 
@@ -125,12 +188,22 @@ function formatFileSize(bytes) {
 
 // ===== FOOD ESTIMATION =====
 async function estimateFood() {
-    if (!selectedFile) return;
+    console.log('Starting food estimation...');
     
+    if (!selectedFile) {
+        console.error('No file selected');
+        showToast('Please select a file first.', true);
+        return;
+    }
+    
+    console.log('Selected file:', selectedFile.name);
     showLoading(true);
     
     try {
+        console.log('Calling estimateFromImage...');
         const estimation = await estimateFromImage(selectedFile);
+        console.log('Estimation result:', estimation);
+        
         currentEstimation = estimation;
         
         showEstimationResult(estimation);
@@ -144,7 +217,8 @@ async function estimateFood() {
         
     } catch (error) {
         console.error('Estimation error:', error);
-        showToast('Failed to estimate food. Please try again.', true);
+        console.error('Error stack:', error.stack);
+        showToast('Failed to estimate food. Error: ' + error.message, true);
     } finally {
         showLoading(false);
     }
@@ -223,6 +297,11 @@ function showEstimationResult(estimation) {
 }
 
 function showManualEntry() {
+    // Don't show manual entry in check mode
+    if (currentMode === 'check') {
+        return;
+    }
+    
     document.getElementById('manual-entry').classList.add('show');
     
     // Pre-fill with current estimation

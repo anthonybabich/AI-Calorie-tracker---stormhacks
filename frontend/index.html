@@ -13,7 +13,7 @@
             <div class="calories-info">
                 Max Calories: <strong id="max-calories-display">2000</strong> kcal
             </div>
-            <button id="setup-profile-btn" class="btn-profile-setup">⚙️ Profile</button>
+            <button id="setup-profile-btn" class="btn-profile-setup" style="z-index: 99999 !important; pointer-events: auto !important; position: relative;" onclick="document.getElementById('simple-modal').style.display='flex';">⚙️ Profile</button>
         </div>
     </div>
 
@@ -34,7 +34,7 @@
                     <span id="calories-eaten" class="large-number" aria-live="polite">0</span>
                     <span class="unit">Eaten</span>
                 </div>
-                <button id="add-food-btn" class="btn-secondary">Add Food</button>
+                <button id="add-food-btn" class="btn-secondary" onclick="window.location.href='add_food.html?mode=add'">Add Food</button>
             </div>
 
             <!-- Completion Ring Section -->
@@ -57,64 +57,58 @@
                         </div>
                     </div>
                 </div>
-                <button id="check-food-btn" class="btn-outline">Check Food</button>
+                <button id="check-food-btn" class="btn-outline" onclick="window.location.href='add_food.html?mode=check'">Check Food</button>
             </div>
 
             <!-- Macros Section -->
             <div class="stats-section macros-section">
                 <div class="macro-bars">
                     <div class="macro-item">
-                        <div class="macro-header">
-                            <span class="macro-name">Carbs</span>
-                            <span class="macro-values">
-                                <span id="carbs-eaten" aria-live="polite">0</span> / 
-                                <span id="carbs-target">250</span> g
-                            </span>
+                        <div class="macro-name">Carbs</div>
+                        <div class="macro-content">
+                            <div class="macro-bar">
+                                <div id="carbs-progress" class="macro-progress carbs" 
+                                     role="progressbar" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100" 
+                                     aria-valuenow="0"
+                                     aria-label="Carbs progress"></div>
+                            </div>
+                            <span class="macro-percentage" id="carbs-percentage">0%</span>
                         </div>
-                        <div class="macro-bar">
-                            <div id="carbs-progress" class="macro-progress carbs" 
-                                 role="progressbar" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100" 
-                                 aria-valuenow="0"
-                                 aria-label="Carbs progress"></div>
-                        </div>
+                        <div class="macro-grams"><span id="carbs-eaten" aria-live="polite">0</span>g</div>
                     </div>
 
                     <div class="macro-item">
-                        <div class="macro-header">
-                            <span class="macro-name">Protein</span>
-                            <span class="macro-values">
-                                <span id="protein-eaten" aria-live="polite">0</span> / 
-                                <span id="protein-target">100</span> g
-                            </span>
+                        <div class="macro-name">Protein</div>
+                        <div class="macro-content">
+                            <div class="macro-bar">
+                                <div id="protein-progress" class="macro-progress protein" 
+                                     role="progressbar" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100" 
+                                     aria-valuenow="0"
+                                     aria-label="Protein progress"></div>
+                            </div>
+                            <span class="macro-percentage" id="protein-percentage">0%</span>
                         </div>
-                        <div class="macro-bar">
-                            <div id="protein-progress" class="macro-progress protein" 
-                                 role="progressbar" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100" 
-                                 aria-valuenow="0"
-                                 aria-label="Protein progress"></div>
-                        </div>
+                        <div class="macro-grams"><span id="protein-eaten" aria-live="polite">0</span>g</div>
                     </div>
 
                     <div class="macro-item">
-                        <div class="macro-header">
-                            <span class="macro-name">Fat</span>
-                            <span class="macro-values">
-                                <span id="fat-eaten" aria-live="polite">0</span> / 
-                                <span id="fat-target">67</span> g
-                            </span>
+                        <div class="macro-name">Fat</div>
+                        <div class="macro-content">
+                            <div class="macro-bar">
+                                <div id="fat-progress" class="macro-progress fat" 
+                                     role="progressbar" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100" 
+                                     aria-valuenow="0"
+                                     aria-label="Fat progress"></div>
+                            </div>
+                            <span class="macro-percentage" id="fat-percentage">0%</span>
                         </div>
-                        <div class="macro-bar">
-                            <div id="fat-progress" class="macro-progress fat" 
-                                 role="progressbar" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100" 
-                                 aria-valuenow="0"
-                                 aria-label="Fat progress"></div>
-                        </div>
+                        <div class="macro-grams"><span id="fat-eaten" aria-live="polite">0</span>g</div>
                     </div>
                 </div>
             </div>
@@ -129,137 +123,444 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast hidden" role="alert" aria-live="assertive">
-        <span id="toast-message"></span>
-    </div>
-
-    <!-- Debug Panel (only shown when DEBUG = true) -->
-    <div id="debug-panel" class="debug-panel hidden">
-        <h4>Debug Panel</h4>
-        <button id="debug-toggle" class="btn-small">Show/Hide Data</button>
-        <button id="debug-reset" class="btn-small">Reset Day Data</button>
-        <pre id="debug-content" class="debug-content hidden"></pre>
-    </div>
-
-    <!-- Onboarding Modal (kept for profile setup) -->
-    <div id="onboarding-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-title">Set Up Your Profile</h2>
-                <button id="cancel-btn" class="cancel-btn" aria-label="Cancel">&times;</button>
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 10000; overflow: hidden;">
+        <div class="modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            
+            <!-- Modal Header -->
+            <div style="padding: 32px 32px 0; position: relative;">
+                <h2 style="margin: 0 0 24px 0; font-size: 28px; font-weight: 700; color: #1a1a1a; text-align: center;">Set Up Your Profile</h2>
+                <button onclick="document.getElementById('onboarding-modal').style.display='none'" style="position: absolute; top: 24px; right: 24px; background: none; border: none; font-size: 28px; cursor: pointer; color: #999; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">×</button>
             </div>
             
-            <!-- Step 1: Basic Info -->
-            <div id="step-1" class="step active">
-                <form id="profile-form">
-                    <div class="form-group">
-                        <label for="activity-level">Days of activity per week:</label>
-                        <select id="activity-level" required>
-                            <option value="">Select activity level</option>
-                            <option value="0">0 days (Sedentary)</option>
-                            <option value="1">1 day (Sedentary)</option>
-                            <option value="2">2 days (Light)</option>
-                            <option value="3">3 days (Light)</option>
-                            <option value="4">4 days (Moderate)</option>
-                            <option value="5">5 days (Moderate)</option>
-                            <option value="6">6 days (Very Active)</option>
-                            <option value="7">7 days (Very Active)</option>
+            <!-- Step 1: Activity Level -->
+            <div id="step-1" style="padding: 0 32px 32px; display: block;">
+                
+                <!-- Activity Level -->
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #333; font-size: 16px;">Days of activity per week:</label>
+                    <select id="activity" onchange="enableNextButton()" style="width: 100%; padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; font-size: 16px; background: white; box-sizing: border-box;">
+                        <option value="">Select activity level</option>
+                        <option value="0">0 days (Sedentary)</option>
+                        <option value="1">1-2 days (Lightly active)</option>
+                        <option value="3">3-4 days (Moderately active)</option>
+                        <option value="5">5+ days (Very active)</option>
+                    </select>
+                </div>
+                
+                <!-- Next Button -->
+                <button type="button" id="next-step-1" onclick="goToStep2()" style="width: 100%; padding: 18px; background: #007bff; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s; z-index: 1000 !important; pointer-events: auto !important;">Next</button>
+            </div>
+            
+            <!-- Step 2: Basic Info & Goals -->
+            <div id="step-2" style="padding: 0 32px 32px; display: none;">
+                
+                <!-- Age -->
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 16px;">Age</label>
+                    <input type="number" id="age" min="13" max="120" placeholder="Enter your age" onwheel="return false;" style="width: 100%; padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; font-size: 16px; box-sizing: border-box; transition: border-color 0.2s;">
+                </div>
+                
+                <!-- Gender -->
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #333; font-size: 16px;">Gender</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <button type="button" data-gender="male" onclick="selectGender('male')" style="padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; background: white; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.2s;">Male</button>
+                        <button type="button" data-gender="female" onclick="selectGender('female')" style="padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; background: white; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.2s;">Female</button>
+                    </div>
+                </div>
+                
+                <!-- Height -->
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 16px;">Height</label>
+                    <div style="display: flex; gap: 12px;">
+                        <input type="number" id="height" min="100" max="250" placeholder="170" onwheel="return false;" style="flex: 1; padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; font-size: 16px; transition: border-color 0.2s;">
+                        <select id="height-unit" style="padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; font-size: 16px; background: white; min-width: 80px;">
+                            <option value="cm">cm</option>
+                            <option value="ft">ft</option>
                         </select>
-                        <div class="error-message" id="activity-error" role="alert"></div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="age">Age:</label>
-                        <input type="text" id="age" required placeholder="25" maxlength="3">
-                        <div class="error-message" id="age-error" role="alert"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="height">Height:</label>
-                        <div class="input-with-units">
-                            <input type="text" id="height" required placeholder="170">
-                            <select id="height-unit">
-                                <option value="cm">cm</option>
-                                <option value="in">in</option>
-                            </select>
-                        </div>
-                        <div class="error-message" id="height-error" role="alert"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="weight">Weight:</label>
-                        <div class="input-with-units">
-                            <input type="text" id="weight" required placeholder="70">
-                            <select id="weight-unit">
-                                <option value="kg">kg</option>
-                                <option value="lb">lb</option>
-                            </select>
-                        </div>
-                        <div class="error-message" id="weight-error" role="alert"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Gender:</label>
-                        <div class="button-group">
-                            <button type="button" class="select-btn" id="male-btn" data-value="male">Male</button>
-                            <button type="button" class="select-btn" id="female-btn" data-value="female">Female</button>
-                        </div>
-                        <div class="error-message" id="gender-error" role="alert"></div>
-                    </div>
-
-                    <button type="submit" id="next-btn" class="primary-btn" disabled>Next</button>
-                </form>
-            </div>
-
-            <!-- Step 2: Goal Selection -->
-            <div id="step-2" class="step">
-                <div class="form-group">
-                    <label>What's your goal?</label>
-                    <div class="button-group goal-buttons">
-                        <button type="button" class="select-btn goal-btn" data-value="cutting">
-                            <strong>Cutting</strong>
-                            <span>Lose weight (-20%)</span>
-                        </button>
-                        <button type="button" class="select-btn goal-btn" data-value="maintaining">
-                            <strong>Maintaining</strong>
-                            <span>Maintain weight (0%)</span>
-                        </button>
-                        <button type="button" class="select-btn goal-btn" data-value="bulking">
-                            <strong>Bulking</strong>
-                            <span>Gain weight (+15%)</span>
-                        </button>
-                    </div>
-                    <div class="error-message" id="goal-error" role="alert"></div>
                 </div>
-
-                <div class="button-row">
-                    <button type="button" id="back-btn" class="secondary-btn">Back</button>
-                    <button type="button" id="complete-btn" class="primary-btn" disabled>Complete Setup</button>
+                
+                <!-- Weight -->
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 16px;">Weight</label>
+                    <div style="display: flex; gap: 12px;">
+                        <input type="number" id="weight" min="30" max="300" placeholder="70" onwheel="return false;" style="flex: 1; padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; font-size: 16px; transition: border-color 0.2s;">
+                        <select id="weight-unit" style="padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; font-size: 16px; background: white; min-width: 80px;">
+                            <option value="kg">kg</option>
+                            <option value="lbs">lbs</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Goals -->
+                <div style="margin-bottom: 32px;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 600; color: #333; font-size: 16px;">What's your goal?</label>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button type="button" data-goal="lose" onclick="selectGoal('lose')" style="padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; background: white; cursor: pointer; font-size: 16px; font-weight: 500; text-align: left; transition: all 0.2s;">🎯 Lose Weight</button>
+                        <button type="button" data-goal="maintain" onclick="selectGoal('maintain')" style="padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; background: white; cursor: pointer; font-size: 16px; font-weight: 500; text-align: left; transition: all 0.2s;">⚖️ Maintain Weight</button>
+                        <button type="button" data-goal="gain" onclick="selectGoal('gain')" style="padding: 16px; border: 2px solid #e1e5e9; border-radius: 12px; background: white; cursor: pointer; font-size: 16px; font-weight: 500; text-align: left; transition: all 0.2s;">💪 Gain Weight</button>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" id="back-step-2" onclick="goToStep1()" style="flex: 1; padding: 18px; background: #6c757d; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;">Back</button>
+                    <button type="button" id="complete-profile" onclick="completeProfileSetup()" disabled style="flex: 1; padding: 18px; background: #ccc; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: not-allowed;">Complete Setup</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Dashboard -->
-    <div id="main-content" class="container">
-        <h1>Upload Food Image</h1>
-        
-        <!-- Profile Summary Card -->
-        <div id="profile-summary" class="profile-card hidden">
-            <h3>Your Profile</h3>
-            <div id="profile-details"></div>
-            <button id="edit-profile-btn" class="secondary-btn">Edit Profile</button>
+    <script>
+        // Simple function to show onboarding modal
+        function showOnboardingModal() {
+            console.log('Profile button clicked - showing modal');
+            const modal = document.getElementById('onboarding-modal');
+            if (modal) {
+                modal.style.display = 'block';
+                modal.classList.remove('hidden');
+                console.log('Modal should now be visible');
+            } else {
+                console.error('Modal element not found');
+                alert('Profile setup not available');
+            }
+        }
+    </script>
+    
+    <!-- Simple Test Modal -->
+    <div id="simple-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 999999; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 40px; border-radius: 16px; max-width: 500px; width: 90%; text-align: center;">
+            <h2>Profile Settings</h2>
+            <button onclick="document.getElementById('simple-modal').style.display='none'; document.getElementById('onboarding-modal').style.display='flex';" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 8px; margin: 8px; cursor: pointer;">Open Profile Setup</button>
+            <button onclick="document.getElementById('simple-modal').style.display='none';" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 8px; margin: 8px; cursor: pointer;">Close</button>
         </div>
-
-        <form id="upload-form">
-            <input type="file" id="file-input" name="file" accept="image/*" required>
-            <button type="submit">Estimate Calories</button>
-        </form>
-        <div class="loader" id="loader"></div>
-        <div id="result"></div>
     </div>
-
+    
     <script src="app.js"></script>
+    <script>
+        // Global variables for selections
+        let selectedGender = '';
+        let selectedGoal = '';
+        
+        // Inline functions to ensure they work
+        function enableNextButton() {
+            const activity = document.getElementById('activity').value;
+            const nextBtn = document.getElementById('next-step-1');
+            
+            if (activity) {
+                nextBtn.disabled = false;
+                nextBtn.style.background = '#007bff';
+                nextBtn.style.cursor = 'pointer';
+            } else {
+                nextBtn.disabled = true;
+                nextBtn.style.background = '#ccc';
+                nextBtn.style.cursor = 'not-allowed';
+            }
+        }
+        
+        function selectGender(gender) {
+            selectedGender = gender;
+            
+            // Update visual selection
+            const genderButtons = document.querySelectorAll('[data-gender]');
+            genderButtons.forEach(btn => {
+                if (btn.dataset.gender === gender) {
+                    btn.style.borderColor = '#007bff';
+                    btn.style.background = '#f0f8ff';
+                    btn.style.color = '#007bff';
+                } else {
+                    btn.style.borderColor = '#e1e5e9';
+                    btn.style.background = 'white';
+                    btn.style.color = '#333';
+                }
+            });
+            
+            validateStep2();
+        }
+        
+        function selectGoal(goal) {
+            selectedGoal = goal;
+            
+            // Update visual selection
+            const goalButtons = document.querySelectorAll('[data-goal]');
+            goalButtons.forEach(btn => {
+                if (btn.dataset.goal === goal) {
+                    btn.style.borderColor = '#007bff';
+                    btn.style.background = '#f0f8ff';
+                    btn.style.color = '#007bff';
+                } else {
+                    btn.style.borderColor = '#e1e5e9';
+                    btn.style.background = 'white';
+                    btn.style.color = '#333';
+                }
+            });
+            
+            validateStep2();
+        }
+        
+        function validateStep2() {
+            const age = document.getElementById('age')?.value;
+            const height = document.getElementById('height')?.value;
+            const weight = document.getElementById('weight')?.value;
+            
+            const isValid = age && height && weight && selectedGender && selectedGoal;
+            
+            const completeBtn = document.getElementById('complete-profile');
+            if (completeBtn) {
+                completeBtn.disabled = !isValid;
+                completeBtn.style.background = isValid ? '#007bff' : '#ccc';
+                completeBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+            }
+        }
+        
+        function goToStep2() {
+            const activity = document.getElementById('activity').value;
+            if (!activity) return;
+            
+            document.getElementById('step-1').style.display = 'none';
+            document.getElementById('step-2').style.display = 'block';
+        }
+        
+        function goToStep1() {
+            document.getElementById('step-2').style.display = 'none';
+            document.getElementById('step-1').style.display = 'block';
+        }
+        
+        function completeProfileSetup() {
+            if (!selectedGender || !selectedGoal) {
+                alert('Please select your gender and goal');
+                return;
+            }
+            
+            // Get form values
+            const age = parseInt(document.getElementById('age').value);
+            const heightValue = parseFloat(document.getElementById('height').value);
+            const heightUnit = document.getElementById('height-unit').value;
+            const weightValue = parseFloat(document.getElementById('weight').value);
+            const weightUnit = document.getElementById('weight-unit').value;
+            const activityDays = parseInt(document.getElementById('activity').value);
+            
+            // Validate required fields
+            if (!age || !heightValue || !weightValue || !activityDays) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Convert to metric
+            const height_cm = heightUnit === 'ft' ? heightValue * 30.48 : heightValue;
+            const weight_kg = weightUnit === 'lbs' ? weightValue * 0.453592 : weightValue;
+            
+            // Create profile object
+            const profile = {
+                age: age,
+                height_cm: height_cm,
+                weight_kg: weight_kg,
+                gender: selectedGender,
+                activity_days: activityDays,
+                goal: selectedGoal,
+                unitPrefs: { height: heightUnit, weight: weightUnit },
+                createdAt: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('calorie_tracker_profile', JSON.stringify(profile));
+            
+            // Close modal
+            document.getElementById('onboarding-modal').style.display = 'none';
+            
+            // Refresh the page to show updated dashboard
+            window.location.reload();
+        }
+        
+        function showProfileModal() {
+            const modal = document.getElementById('onboarding-modal');
+            
+            if (modal) {
+                // Force show the modal
+                modal.style.display = 'flex';
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+                modal.style.zIndex = '999999';
+                modal.style.position = 'fixed';
+                modal.style.top = '0';
+                modal.style.left = '0';
+                modal.style.width = '100vw';
+                modal.style.height = '100vh';
+                modal.style.background = 'rgba(0,0,0,0.8)';
+                
+                // Show step 1, hide step 2
+                const step1 = document.getElementById('step-1');
+                const step2 = document.getElementById('step-2');
+                if (step1) step1.style.display = 'block';
+                if (step2) step2.style.display = 'none';
+                
+                // Load existing profile data if available
+                const existingProfile = localStorage.getItem('calorie_tracker_profile');
+                if (existingProfile) {
+                    try {
+                        const profile = JSON.parse(existingProfile);
+                        
+                        // Pre-populate activity
+                        if (profile.activity_days) {
+                            document.getElementById('activity').value = profile.activity_days;
+                            enableNextButton();
+                        }
+                        
+                        // Pre-populate other fields
+                        if (profile.age) document.getElementById('age').value = profile.age;
+                        
+                        if (profile.height_cm) {
+                            const heightUnit = profile.unitPrefs?.height || 'cm';
+                            const heightValue = heightUnit === 'ft' ? (profile.height_cm / 30.48).toFixed(1) : profile.height_cm;
+                            document.getElementById('height').value = heightValue;
+                            document.getElementById('height-unit').value = heightUnit;
+                        }
+                        
+                        if (profile.weight_kg) {
+                            const weightUnit = profile.unitPrefs?.weight || 'kg';
+                            const weightValue = weightUnit === 'lbs' ? (profile.weight_kg / 0.453592).toFixed(1) : profile.weight_kg;
+                            document.getElementById('weight').value = weightValue;
+                            document.getElementById('weight-unit').value = weightUnit;
+                        }
+                        
+                        // Set selections
+                        if (profile.gender) {
+                            selectedGender = profile.gender;
+                            selectGender(selectedGender);
+                        }
+                        
+                        if (profile.goal) {
+                            selectedGoal = profile.goal;
+                            selectGoal(selectedGoal);
+                        }
+                        
+                        // Enable buttons
+                        setTimeout(() => validateStep2(), 100);
+                    } catch (error) {
+                        console.error('Error loading profile:', error);
+                    }
+                }
+            }
+        }
+        
+        function openProfileModal() {
+            console.log('openProfileModal called');
+            
+            // Show modal first
+            const modal = document.getElementById('onboarding-modal');
+            console.log('Modal element:', modal);
+            
+            if (modal) {
+                modal.style.display = 'flex';
+                console.log('Modal display set to flex');
+                
+                // Reset to step 1
+                document.getElementById('step-1').style.display = 'block';
+                document.getElementById('step-2').style.display = 'none';
+                
+                // Load existing profile data
+                const existingProfile = localStorage.getItem('calorie_tracker_profile');
+                console.log('Existing profile:', existingProfile);
+                
+                if (existingProfile) {
+                    try {
+                        const profile = JSON.parse(existingProfile);
+                        console.log('Parsed profile:', profile);
+                        
+                        // Pre-populate form with existing data
+                        if (profile.activity_days) {
+                            document.getElementById('activity').value = profile.activity_days;
+                            enableNextButton(); // Enable next button since activity is set
+                        }
+                        
+                        if (profile.age) document.getElementById('age').value = profile.age;
+                        
+                        // Handle height
+                        if (profile.height_cm) {
+                            const heightUnit = profile.unitPrefs?.height || 'cm';
+                            const heightValue = heightUnit === 'ft' ? (profile.height_cm / 30.48).toFixed(1) : profile.height_cm;
+                            document.getElementById('height').value = heightValue;
+                            document.getElementById('height-unit').value = heightUnit;
+                        }
+                        
+                        // Handle weight
+                        if (profile.weight_kg) {
+                            const weightUnit = profile.unitPrefs?.weight || 'kg';
+                            const weightValue = weightUnit === 'lbs' ? (profile.weight_kg / 0.453592).toFixed(1) : profile.weight_kg;
+                            document.getElementById('weight').value = weightValue;
+                            document.getElementById('weight-unit').value = weightUnit;
+                        }
+                        
+                        // Set selected gender and goal
+                        if (profile.gender) {
+                            selectedGender = profile.gender;
+                            selectGender(selectedGender);
+                        }
+                        
+                        if (profile.goal) {
+                            selectedGoal = profile.goal;
+                            selectGoal(selectedGoal);
+                        }
+                        
+                        // Validate step 2 to enable complete button
+                        setTimeout(() => validateStep2(), 100);
+                        
+                    } catch (error) {
+                        console.error('Error parsing profile:', error);
+                    }
+                }
+            } else {
+                console.error('Modal not found!');
+            }
+        }
+        
+        // Add input listeners for step 2 validation
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                // Initialize button state based on current selection
+                enableNextButton();
+                
+                const ageInput = document.getElementById('age');
+                const heightInput = document.getElementById('height');
+                const weightInput = document.getElementById('weight');
+                
+                if (ageInput) ageInput.addEventListener('input', validateStep2);
+                if (heightInput) heightInput.addEventListener('input', validateStep2);
+                if (weightInput) weightInput.addEventListener('input', validateStep2);
+                
+                // Prevent scroll wheel from changing number input values
+                const numberInputs = document.querySelectorAll('input[type="number"]');
+                numberInputs.forEach(input => {
+                    // Prevent wheel events completely
+                    input.addEventListener('wheel', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.blur(); // Remove focus to prevent any changes
+                        return false;
+                    }, { passive: false });
+                    
+                    // Also prevent on focus
+                    input.addEventListener('focus', function() {
+                        this.addEventListener('wheel', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.blur();
+                            return false;
+                        }, { passive: false });
+                    });
+                    
+                    // Prevent mousewheel for older browsers
+                    input.addEventListener('mousewheel', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.blur();
+                        return false;
+                    }, { passive: false });
+                });
+            }, 100);
+        });
+    </script>
 </body>
 </html>

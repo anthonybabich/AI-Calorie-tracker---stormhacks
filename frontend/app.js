@@ -8,7 +8,7 @@ let currentDayData = null;
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.debug('App initialized');
+    console.log('App initialized - DOM loaded');
     
     currentProfile = loadProfile();
     // Force reload current day data to ensure latest updates
@@ -338,9 +338,9 @@ function updateDashboard() {
     }
     
     // Update macro bars - ensure values are not undefined
-    updateMacroBar('carbs', currentDayData.carbs_g || 0, targets.macroTargets.carbs_g);
-    updateMacroBar('protein', currentDayData.protein_g || 0, targets.macroTargets.protein_g);
-    updateMacroBar('fat', currentDayData.fat_g || 0, targets.macroTargets.fat_g);
+    updateMacroBar('carbs', currentDayData.carbs_g || 0, targets.macroTargets.carbs_g, currentDayData.eatenCalories);
+    updateMacroBar('protein', currentDayData.protein_g || 0, targets.macroTargets.protein_g, currentDayData.eatenCalories);
+    updateMacroBar('fat', currentDayData.fat_g || 0, targets.macroTargets.fat_g, currentDayData.eatenCalories);
     
     updateFoodLog();
 }
@@ -375,12 +375,27 @@ function updateCompletionRing(percent) {
     ring.setAttribute('aria-valuenow', Math.round(percent));
 }
 
-function updateMacroBar(macro, eaten, target) {
+function updateMacroBar(macro, eaten, target, totalCalories = 0) {
     const percent = Math.min(100, (eaten / target) * 100);
     
+    // Update grams consumed
     document.getElementById(`${macro}-eaten`).textContent = Math.round(eaten);
-    document.getElementById(`${macro}-target`).textContent = target;
     
+    // Calculate calories from this macro
+    let caloriesFromMacro = 0;
+    if (macro === 'carbs') {
+        caloriesFromMacro = eaten * 4; // 4 calories per gram of carbs
+    } else if (macro === 'protein') {
+        caloriesFromMacro = eaten * 4; // 4 calories per gram of protein
+    } else if (macro === 'fat') {
+        caloriesFromMacro = eaten * 9; // 9 calories per gram of fat
+    }
+    
+    // Calculate percentage of consumed calories (should total 100% across all macros)
+    const percentOfConsumedCalories = totalCalories > 0 ? Math.round((caloriesFromMacro / totalCalories) * 100) : 0;
+    document.getElementById(`${macro}-percentage`).textContent = `${percentOfConsumedCalories}%`;
+    
+    // Update progress bar (still based on target for visual progress)
     const progressBar = document.getElementById(`${macro}-progress`);
     progressBar.style.width = `${percent}%`;
     progressBar.setAttribute('aria-valuenow', Math.round(percent));
@@ -412,17 +427,41 @@ function updateFoodLog() {
 
 // ===== EVENT LISTENERS =====
 function setupEventListeners() {
-    // Profile setup
-    document.getElementById('setup-profile-btn')?.addEventListener('click', showOnboarding);
+    console.log('Setting up event listeners...');
     
-    // Add/Check food buttons
-    document.getElementById('add-food-btn')?.addEventListener('click', () => {
-        window.location.href = 'add_food.html?mode=add';
-    });
-    
-    document.getElementById('check-food-btn')?.addEventListener('click', () => {
-        window.location.href = 'add_food.html?mode=check';
-    });
+    // Direct button approach - wait a moment for DOM to be fully ready
+    setTimeout(() => {
+        const profileBtn = document.getElementById('setup-profile-btn');
+        const addFoodBtn = document.getElementById('add-food-btn');
+        const checkFoodBtn = document.getElementById('check-food-btn');
+        
+        console.log('Found buttons:', {
+            profile: !!profileBtn,
+            addFood: !!addFoodBtn,
+            checkFood: !!checkFoodBtn
+        });
+        
+        if (profileBtn) {
+            profileBtn.onclick = function() {
+                console.log('Profile button clicked');
+                showOnboarding();
+            };
+        }
+        
+        if (addFoodBtn) {
+            addFoodBtn.onclick = function() {
+                console.log('Add Food button clicked');
+                window.location.href = 'add_food.html?mode=add';
+            };
+        }
+        
+        if (checkFoodBtn) {
+            checkFoodBtn.onclick = function() {
+                console.log('Check Food button clicked');
+                window.location.href = 'add_food.html?mode=check';
+            };
+        }
+    }, 100);
     
     // Onboarding (keeping existing functionality)
     setupOnboardingEventListeners();
@@ -461,9 +500,9 @@ function setupOnboardingEventListeners() {
     
     // Modal buttons
     const cancelBtn = document.getElementById('cancel-btn');
-    const completeBtn = document.getElementById('complete-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const backBtn = document.getElementById('back-btn');
+    const completeBtn = document.getElementById('complete-profile');
+    const nextBtn = document.getElementById('next-step-1');
+    const backBtn = document.getElementById('back-step-2');
     
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => {
@@ -504,11 +543,11 @@ function setupInputValidation() {
     const ageInput = document.getElementById('age');
     const heightInput = document.getElementById('height');
     const weightInput = document.getElementById('weight');
-    const activitySelect = document.getElementById('activity-level');
+    const activitySelect = document.getElementById('activity');
     
-    if (ageInput) ageInput.addEventListener('input', validateStep1);
-    if (heightInput) heightInput.addEventListener('input', validateStep1);
-    if (weightInput) weightInput.addEventListener('input', validateStep1);
+    if (ageInput) ageInput.addEventListener('input', validateStep2);
+    if (heightInput) heightInput.addEventListener('input', validateStep2);
+    if (weightInput) weightInput.addEventListener('input', validateStep2);
     if (activitySelect) activitySelect.addEventListener('change', validateStep1);
 }
 
@@ -516,80 +555,85 @@ let selectedGender = '';
 let selectedGoal = '';
 
 function setupGenderSelection() {
-    const maleBtn = document.getElementById('male-btn');
-    const femaleBtn = document.getElementById('female-btn');
+    const genderButtons = document.querySelectorAll('[data-gender]');
     
-    if (maleBtn) {
-        maleBtn.addEventListener('click', () => selectGender('male'));
-    }
-    if (femaleBtn) {
-        femaleBtn.addEventListener('click', () => selectGender('female'));
-    }
+    genderButtons.forEach(btn => {
+        btn.addEventListener('click', () => selectGender(btn.dataset.gender));
+    });
 }
 
 function selectGender(gender) {
     selectedGender = gender;
     
-    const maleBtn = document.getElementById('male-btn');
-    const femaleBtn = document.getElementById('female-btn');
+    const genderButtons = document.querySelectorAll('[data-gender]');
+    genderButtons.forEach(btn => {
+        btn.style.borderColor = btn.dataset.gender === gender ? '#007bff' : '#e1e5e9';
+        btn.style.background = btn.dataset.gender === gender ? '#f0f8ff' : 'white';
+    });
     
-    if (maleBtn && femaleBtn) {
-        maleBtn.classList.toggle('selected', gender === 'male');
-        femaleBtn.classList.toggle('selected', gender === 'female');
-    }
-    
-    validateStep1();
+    validateStep2();
 }
 
 function setupGoalSelection() {
-    const goalButtons = document.querySelectorAll('.goal-btn');
+    const goalButtons = document.querySelectorAll('[data-goal]');
     
     goalButtons.forEach(button => {
-        button.addEventListener('click', () => selectGoal(button.dataset.value));
+        button.addEventListener('click', () => selectGoal(button.dataset.goal));
     });
 }
 
 function selectGoal(goal) {
     selectedGoal = goal;
     
-    const goalButtons = document.querySelectorAll('.goal-btn');
-    
-    goalButtons.forEach(button => {
-        button.classList.toggle('selected', button.dataset.value === goal);
+    const goalButtons = document.querySelectorAll('[data-goal]');
+    goalButtons.forEach(btn => {
+        btn.style.borderColor = btn.dataset.goal === goal ? '#007bff' : '#e1e5e9';
+        btn.style.background = btn.dataset.goal === goal ? '#f0f8ff' : 'white';
     });
     
-    const completeBtn = document.getElementById('complete-btn');
-    if (completeBtn) {
-        completeBtn.disabled = false;
-    }
+    validateStep2();
 }
 
 function validateStep1() {
+    const activity = document.getElementById('activity')?.value;
+    
+    const isValid = activity;
+    
+    const nextBtn = document.getElementById('next-step-1');
+    if (nextBtn) {
+        nextBtn.disabled = !isValid;
+        nextBtn.style.background = isValid ? '#007bff' : '#ccc';
+        nextBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+    }
+    
+    return isValid;
+}
+
+function validateStep2() {
     const age = document.getElementById('age')?.value;
     const height = document.getElementById('height')?.value;
     const weight = document.getElementById('weight')?.value;
-    const activity = document.getElementById('activity-level')?.value;
     
-    const isValid = age && height && weight && activity && selectedGender;
+    const isValid = age && height && weight && selectedGender && selectedGoal;
     
-    const nextBtn = document.getElementById('next-btn');
-    if (nextBtn) {
-        nextBtn.disabled = !isValid;
+    const completeBtn = document.getElementById('complete-profile');
+    if (completeBtn) {
+        completeBtn.disabled = !isValid;
+        completeBtn.style.background = isValid ? '#007bff' : '#ccc';
+        completeBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
     }
     
     return isValid;
 }
 
 function goToStep2() {
-    document.getElementById('step-1')?.classList.remove('active');
-    document.getElementById('step-2')?.classList.add('active');
-    document.getElementById('modal-title').textContent = 'Choose Your Goal';
+    document.getElementById('step-1').style.display = 'none';
+    document.getElementById('step-2').style.display = 'block';
 }
 
 function goToStep1() {
-    document.getElementById('step-2')?.classList.remove('active');
-    document.getElementById('step-1')?.classList.add('active');
-    document.getElementById('modal-title').textContent = 'Set Up Your Profile';
+    document.getElementById('step-2').style.display = 'none';
+    document.getElementById('step-1').style.display = 'block';
 }
 
 function completeProfileSetup() {
@@ -604,7 +648,7 @@ function completeProfileSetup() {
     const heightUnit = document.getElementById('height-unit').value;
     const weightValue = parseFloat(document.getElementById('weight').value);
     const weightUnit = document.getElementById('weight-unit').value;
-    const activityDays = parseInt(document.getElementById('activity-level').value);
+    const activityDays = parseInt(document.getElementById('activity').value);
     
     // Convert to metric
     const height_cm = heightUnit === 'in' ? heightValue * 2.54 : heightValue;
