@@ -7,14 +7,12 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Max Calories Badge with Profile Setup -->
-    <div id="max-calories-badge" class="max-calories-badge">
-        <div class="badge-content">
-            <div class="calories-info">
-                Max Calories: <strong id="max-calories-display">2000</strong> kcal
-            </div>
-            <button id="setup-profile-btn" class="btn-profile-setup" style="z-index: 99999 !important; pointer-events: auto !important; position: relative;" onclick="document.getElementById('simple-modal').style.display='flex';">⚙️ Profile</button>
-        </div>
+    <!-- Profile Icon -->
+    <div id="setup-profile-btn" class="profile-icon-circle standalone-profile" style="z-index: 99999 !important; pointer-events: auto !important; position: absolute; top: 20px; right: 20px;" onclick="document.getElementById('simple-modal').style.display='flex';">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M6 20c0-4.418 2.686-8 6-8s6 3.582 6 8" stroke="currentColor" stroke-width="2" fill="none"/>
+        </svg>
     </div>
 
     <!-- Main Dashboard Container -->

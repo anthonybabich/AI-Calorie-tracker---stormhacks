@@ -318,9 +318,11 @@ function updateDashboard() {
     const remaining = Math.max(0, targets.maxCalories - currentDayData.eatenCalories);
     animateNumber(document.getElementById('calories-remaining'), remaining);
     
-    // Update max calories displays
-    document.getElementById('max-calories-display').textContent = targets.maxCalories;
-    document.getElementById('max-calories-center').textContent = targets.maxCalories;
+    // Update max calories display (only if element exists)
+    const maxCaloriesCenter = document.getElementById('max-calories-center');
+    if (maxCaloriesCenter) {
+        maxCaloriesCenter.textContent = targets.maxCalories;
+    }
     
     // Update completion ring
     const completionPercent = Math.min(100, (currentDayData.eatenCalories / targets.maxCalories) * 100);
@@ -338,9 +340,7 @@ function updateDashboard() {
     }
     
     // Update macro bars - ensure values are not undefined
-    updateMacroBar('carbs', currentDayData.carbs_g || 0, targets.macroTargets.carbs_g, currentDayData.eatenCalories);
-    updateMacroBar('protein', currentDayData.protein_g || 0, targets.macroTargets.protein_g, currentDayData.eatenCalories);
-    updateMacroBar('fat', currentDayData.fat_g || 0, targets.macroTargets.fat_g, currentDayData.eatenCalories);
+    updateMacroBarsNormalized(currentDayData, targets);
     
     updateFoodLog();
 }
@@ -373,6 +373,124 @@ function updateCompletionRing(percent) {
     
     ring.style.strokeDashoffset = offset;
     ring.setAttribute('aria-valuenow', Math.round(percent));
+}
+
+function updateMacroBarsNormalized(dayData, targets) {
+    const macros = [
+        { name: 'carbs', eaten: dayData.carbs_g || 0, target: targets.macroTargets.carbs_g, caloriesPerGram: 4 },
+        { name: 'protein', eaten: dayData.protein_g || 0, target: targets.macroTargets.protein_g, caloriesPerGram: 4 },
+        { name: 'fat', eaten: dayData.fat_g || 0, target: targets.macroTargets.fat_g, caloriesPerGram: 9 }
+    ];
+
+    // Calculate calories from each macro
+    const macroCalories = macros.map(macro => ({
+        ...macro,
+        calories: macro.eaten * macro.caloriesPerGram
+    }));
+
+    // Calculate total calories from macros
+    const totalCaloriesFromMacros = macroCalories.reduce((sum, macro) => sum + macro.calories, 0);
+
+    if (totalCaloriesFromMacros === 0) {
+        // No macros consumed, show 0% for all
+        macros.forEach(macro => {
+            document.getElementById(`${macro.name}-eaten`).textContent = '0';
+            document.getElementById(`${macro.name}-percentage`).textContent = '0%';
+            document.getElementById(`${macro.name}-progress`).style.width = '0%';
+            document.getElementById(`${macro.name}-progress`).setAttribute('aria-valuenow', 0);
+        });
+        return;
+    }
+
+    // Calculate raw percentages
+    const rawPercentages = macroCalories.map(macro => (macro.calories / totalCaloriesFromMacros) * 100);
+
+    // Round percentages and calculate the difference from 100%
+    const roundedPercentages = rawPercentages.map(p => Math.round(p));
+    const total = roundedPercentages.reduce((sum, p) => sum + p, 0);
+    const difference = 100 - total;
+
+    // Distribute the difference to make it exactly 100%
+    if (difference !== 0) {
+        // Find the macro with the largest raw percentage to adjust
+        const maxIndex = rawPercentages.indexOf(Math.max(...rawPercentages));
+        roundedPercentages[maxIndex] += difference;
+    }
+
+    // Update the UI for each macro
+    macroCalories.forEach((macro, index) => {
+        const percentage = roundedPercentages[index];
+        
+        // Update grams consumed
+        document.getElementById(`${macro.name}-eaten`).textContent = Math.round(macro.eaten);
+        
+        // Update percentage display
+        document.getElementById(`${macro.name}-percentage`).textContent = `${percentage}%`;
+        
+        // Update progress bar
+        const progressBar = document.getElementById(`${macro.name}-progress`);
+        progressBar.style.width = `${percentage}%`;
+        progressBar.setAttribute('aria-valuenow', percentage);
+    });
+}
+
+function updateMacroBarsNormalized(dayData, targets) {
+    const macros = [
+        { name: 'carbs', eaten: dayData.carbs_g || 0, target: targets.macroTargets.carbs_g, caloriesPerGram: 4 },
+        { name: 'protein', eaten: dayData.protein_g || 0, target: targets.macroTargets.protein_g, caloriesPerGram: 4 },
+        { name: 'fat', eaten: dayData.fat_g || 0, target: targets.macroTargets.fat_g, caloriesPerGram: 9 }
+    ];
+
+    // Calculate calories from each macro
+    const macroCalories = macros.map(macro => ({
+        ...macro,
+        calories: macro.eaten * macro.caloriesPerGram
+    }));
+
+    // Calculate total calories from macros
+    const totalCaloriesFromMacros = macroCalories.reduce((sum, macro) => sum + macro.calories, 0);
+
+    if (totalCaloriesFromMacros === 0) {
+        // No macros consumed, show 0% for all
+        macros.forEach(macro => {
+            document.getElementById(`${macro.name}-eaten`).textContent = '0';
+            document.getElementById(`${macro.name}-percentage`).textContent = '0%';
+            document.getElementById(`${macro.name}-progress`).style.width = '0%';
+            document.getElementById(`${macro.name}-progress`).setAttribute('aria-valuenow', 0);
+        });
+        return;
+    }
+
+    // Calculate raw percentages
+    const rawPercentages = macroCalories.map(macro => (macro.calories / totalCaloriesFromMacros) * 100);
+
+    // Round percentages and calculate the difference from 100%
+    const roundedPercentages = rawPercentages.map(p => Math.round(p));
+    const total = roundedPercentages.reduce((sum, p) => sum + p, 0);
+    const difference = 100 - total;
+
+    // Distribute the difference to make it exactly 100%
+    if (difference !== 0) {
+        // Find the macro with the largest raw percentage to adjust
+        const maxIndex = rawPercentages.indexOf(Math.max(...rawPercentages));
+        roundedPercentages[maxIndex] += difference;
+    }
+
+    // Update the UI for each macro
+    macroCalories.forEach((macro, index) => {
+        const percentage = roundedPercentages[index];
+        
+        // Update grams consumed
+        document.getElementById(`${macro.name}-eaten`).textContent = Math.round(macro.eaten);
+        
+        // Update percentage display
+        document.getElementById(`${macro.name}-percentage`).textContent = `${percentage}%`;
+        
+        // Update progress bar
+        const progressBar = document.getElementById(`${macro.name}-progress`);
+        progressBar.style.width = `${percentage}%`;
+        progressBar.setAttribute('aria-valuenow', percentage);
+    });
 }
 
 function updateMacroBar(macro, eaten, target, totalCalories = 0) {
