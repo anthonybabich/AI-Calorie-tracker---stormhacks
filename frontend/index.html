@@ -4,77 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calorie Estimator</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f9;
-        }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-        h1 {
-            color: #333;
-        }
-        input[type="file"] {
-            margin-bottom: 1rem;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 2s linear infinite;
-            margin: 1rem auto;
-            display: none;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #result {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            border-radius: 5px;
-            background-color: #e9ecef;
-            display: none;
-        }
-        .error {
-            color: #dc3545;
-            background-color: #f8d7da;
-        }
-        .low-confidence {
-            background-color: #fff3cd;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <!-- Calorie Counter Display -->
+    <div id="calorie-counter" class="calorie-counter hidden">
+        <span>Max Calories: <strong id="daily-calories">0</strong> kcal</span>
+    </div>
+
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Set Up Your Profile</h2>
+                <button id="cancel-btn" class="cancel-btn" aria-label="Cancel">&times;</button>
+            </div>
+            
+            <!-- Step 1: Basic Info -->
+            <div id="step-1" class="step active">
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label for="activity-level">Days of activity per week:</label>
+                        <select id="activity-level" required>
+                            <option value="">Select activity level</option>
+                            <option value="0">0 days (Sedentary)</option>
+                            <option value="1">1 day (Sedentary)</option>
+                            <option value="2">2 days (Light)</option>
+                            <option value="3">3 days (Light)</option>
+                            <option value="4">4 days (Moderate)</option>
+                            <option value="5">5 days (Moderate)</option>
+                            <option value="6">6 days (Very Active)</option>
+                            <option value="7">7 days (Very Active)</option>
+                        </select>
+                        <div class="error-message" id="activity-error" role="alert"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="text" id="age" required placeholder="25" maxlength="3">
+                        <div class="error-message" id="age-error" role="alert"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height">Height:</label>
+                        <div class="input-with-units">
+                            <input type="text" id="height" required placeholder="170">
+                            <select id="height-unit">
+                                <option value="cm">cm</option>
+                                <option value="in">in</option>
+                            </select>
+                        </div>
+                        <div class="error-message" id="height-error" role="alert"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Weight:</label>
+                        <div class="input-with-units">
+                            <input type="text" id="weight" required placeholder="70">
+                            <select id="weight-unit">
+                                <option value="kg">kg</option>
+                                <option value="lb">lb</option>
+                            </select>
+                        </div>
+                        <div class="error-message" id="weight-error" role="alert"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gender:</label>
+                        <div class="button-group">
+                            <button type="button" class="select-btn" id="male-btn" data-value="male">Male</button>
+                            <button type="button" class="select-btn" id="female-btn" data-value="female">Female</button>
+                        </div>
+                        <div class="error-message" id="gender-error" role="alert"></div>
+                    </div>
+
+                    <button type="submit" id="next-btn" class="primary-btn" disabled>Next</button>
+                </form>
+            </div>
+
+            <!-- Step 2: Goal Selection -->
+            <div id="step-2" class="step">
+                <div class="form-group">
+                    <label>What's your goal?</label>
+                    <div class="button-group goal-buttons">
+                        <button type="button" class="select-btn goal-btn" data-value="cutting">
+                            <strong>Cutting</strong>
+                            <span>Lose weight (-20%)</span>
+                        </button>
+                        <button type="button" class="select-btn goal-btn" data-value="maintaining">
+                            <strong>Maintaining</strong>
+                            <span>Maintain weight (0%)</span>
+                        </button>
+                        <button type="button" class="select-btn goal-btn" data-value="bulking">
+                            <strong>Bulking</strong>
+                            <span>Gain weight (+15%)</span>
+                        </button>
+                    </div>
+                    <div class="error-message" id="goal-error" role="alert"></div>
+                </div>
+
+                <div class="button-row">
+                    <button type="button" id="back-btn" class="secondary-btn">Back</button>
+                    <button type="button" id="complete-btn" class="primary-btn" disabled>Complete Setup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="main-content" class="container">
         <h1>Upload Food Image</h1>
+        
+        <!-- Profile Summary Card -->
+        <div id="profile-summary" class="profile-card hidden">
+            <h3>Your Profile</h3>
+            <div id="profile-details"></div>
+            <button id="edit-profile-btn" class="secondary-btn">Edit Profile</button>
+        </div>
+
         <form id="upload-form">
             <input type="file" id="file-input" name="file" accept="image/*" required>
             <button type="submit">Estimate Calories</button>
